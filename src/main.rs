@@ -1,9 +1,13 @@
 #![feature(async_closure)]
+// use std::io::Error;
+
+use chrono;
 use futures::future::join_all;
+use postgres::{Client, NoTls};
 use thirtyfour::prelude::*;
 
 #[tokio::main]
-async fn main() -> WebDriverResult<()> {
+async fn scrape() -> Result<Vec<String>, WebDriverError> {
     let caps = DesiredCapabilities::chrome();
     let driver = WebDriver::new("http://localhost:9515", caps).await?;
 
@@ -41,5 +45,20 @@ async fn main() -> WebDriverResult<()> {
     // Always explicitly close the browser.
     driver.quit().await?;
 
-    Ok(())
+    Ok(url_options)
+}
+
+fn main() {
+    let mut client = Client::connect("host=/var/run/postgresql user=terrhy999 dbname=mydb", NoTls)
+        .expect("I guess something broke");
+
+    for row in client.query("SELECT * FROM weather", &[]).expect("panic 3") {
+        dbg!(&row);
+        let temp_lo: i32 = row.get("temp_lo");
+        let temp_high: Option<i32> = row.get("temp_hi");
+        let prcp: Option<f32> = row.get("prcp");
+        let date: chrono::NaiveDate = row.get("date");
+
+        println!("found person: {:?} {:?} {:?}", temp_lo, temp_high, prcp);
+    }
 }

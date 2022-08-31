@@ -9,3 +9,5 @@ edition = "2021"
 thirtyfour = "0.31.0"
 tokio = { version = "1.20.1", features = ["full"] }
 futures = "0.3.23"
+postgres = {version = "0.19.4", features = ["with-chrono-0_4"]}
+chrono = "0.4"
